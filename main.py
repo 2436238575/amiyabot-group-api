@@ -3,7 +3,8 @@ import os
 from amiyabot import Message, log
 
 from core import AmiyaBotPluginInstance
-from .server_api import server_state_flags  # 必须执行这个空引入来引入服务器代码
+from .game_registry import game_registry
+from .server_api import remember_message, server_state_flags  # 必须执行这个空引入来引入服务器代码
 
 curr_dir = os.path.dirname(__file__)
 
@@ -11,6 +12,7 @@ class _PluginInstance(AmiyaBotPluginInstance):
     def install(self):
         pass
     def load(self):
+        game_registry.reset()
         server_state_flags["ready"] = True
         log.info('GroupAPIPluginInstance Ready')
 
@@ -27,3 +29,8 @@ bot = _PluginInstance(
 @bot.message_before_handle
 async def _(data: Message, factory_name: str, instance):
     server_state_flags["live"] = True
+
+
+@bot.message_created
+async def _remember(data: Message, instance):
+    remember_message(data)

@@ -2,6 +2,27 @@
 
 该插件为 AmiyaBot 提供了群聊管理的 RESTful API 接口，允许通过 HTTP 请求管理群组状态和功能。
 
+## Bridge 游戏状态
+
+`GET /bridge/v1/game-sessions` 返回当前活动游戏。该接口使用 Amiya
+框架已有的 `AuthKey` 鉴权。游戏插件可以通过动态导入注册状态：
+
+```python
+from importlib import import_module
+
+registry = import_module("amiyabot-group-api.game_registry").game_registry
+game_id = registry.start(group_id, "my-plugin", "猜干员", timeout=900)
+registry.touch(game_id, timeout=900)
+registry.finish(game_id)
+```
+
+## Bridge 能力接口
+
+- `GET /bridge/v1/capabilities`：返回已加载的 Amiya 消息响应器清单。
+- `POST /bridge/v1/capabilities/{capability_id}/invoke`：在 Amiya 最近收到的同群同用户消息上下文中执行可调用响应器。
+
+清单中的 `dynamic` 响应器不会被 AstrBot 默认拦截，需在 AstrBot 配置中显式添加匹配规则。
+
 ## 功能特性
 
 - 获取群组启用状态列表
@@ -10,6 +31,12 @@
 - 设置群组功能启用/停用状态
 
 ## API 接口
+
+### Bridge 帮助接口
+
+`GET /bridge/v1/help?group_id=<群号>` 返回仿 AmiyaBot 帮助菜单的插件清单和当前群启用状态。
+
+`GET /bridge/v1/help/<plugin_id>` 返回插件的使用文档，优先使用 `instruction`，群聊场景存在 `*-public` 文档时优先返回 public 版本。
 
 ### 1. 获取群启用状态列表
 
